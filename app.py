@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pickle
 import pandas as pd
 from scipy.sparse import hstack
@@ -14,7 +15,7 @@ MODEL_PATH = os.path.join(MODEL_DIR, "best_model.pkl")
 VECTORIZER_PATH = os.path.join(MODEL_DIR, "vectorizer.pkl")
 LABELS_PATH = os.path.join(MODEL_DIR, "labels_map.pkl")
 
-# Load artifacts (placeholders will be replaced by you)
+# Load artifacts
 def safe_load(path):
     if not os.path.exists(path):
         raise FileNotFoundError(f"Required file not found: {path}")
@@ -26,7 +27,6 @@ try:
     vectorizer = safe_load(VECTORIZER_PATH)
     labels_map = safe_load(LABELS_PATH)
 except Exception as e:
-    # Keep app importable; raise on predict if missing
     model = None
     vectorizer = None
     labels_map = None
@@ -47,6 +47,7 @@ def predict_vulnerability_internal(new_code):
     return predicted_vulnerability
 
 app = Flask(__name__)
+CORS(app, resources={r"/predict": {"origins": "*"}})  # Allow all origins; restrict in production
 
 @app.route("/health", methods=["GET"])
 def health():
