@@ -64,9 +64,17 @@ def predict():
         if not isinstance(code_input, str) or not code_input.strip():
             return jsonify({"error": "No Solidity code provided in 'code' field"}), 400
         prediction = predict_vulnerability_internal(code_input)
-        return jsonify({"predicted_vulnerability": prediction}), 200
+        # Convert single prediction to array format
+        result = {
+            "vulnerabilityPrediction": {
+                "predictions": [prediction],  # Wrap in array
+                "confidence": 0.95,  # Example confidence
+                "message": f"Analyzed code: {code_input[:50]}..."  # Truncate for brevity
+            }
+        }
+        return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
